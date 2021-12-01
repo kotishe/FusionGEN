@@ -113,7 +113,7 @@ class Admin extends MX_Controller
 		$identifier = $this->input->post('identifier');
 		$content = $this->input->post('content');
 
-		if(strlen($headline) > 70 || empty($headline))
+		if(mb_strlen($headline) > 70 || empty($headline))
 		{
 			die("The headline must be between 1-70 characters long");
 		}
