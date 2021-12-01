@@ -38,7 +38,7 @@ class Theme extends MX_Controller
 
 	private function getThemes()
 	{
-		$themes = glob("application/themes/*");
+		$themes = glob("application/themes/*", GLOB_ONLYDIR);
 		$themesArr = array();
 
 		foreach($themes as $key => $value)

@@ -119,21 +119,18 @@ class Accounts extends MX_Controller
 	{
 		$modules = array();
 
-		foreach(glob("application/modules/*") as $module)
+		foreach(glob("application/modules/*", GLOB_ONLYDIR) as $module)
 		{
-			if(is_dir($module))
+			$data = file_get_contents($module."/manifest.json");
+			$manifest = json_decode($data, true);
+
+			$module = preg_replace("/^application\/modules\//", "", $module);
+
+			if(is_array($manifest))
 			{
-				$data = file_get_contents($module."/manifest.json");
-				$manifest = json_decode($data, true);
-
-				$module = preg_replace("/^application\/modules\//", "", $module);
-
-				if(is_array($manifest))
-				{
-					$modules[$module]['name'] = (array_key_exists("name", $manifest)) ? $manifest['name'] : $module;
-					$modules[$module]['manifest'] = (array_key_exists("permissions", $manifest)) ? $manifest['permissions'] : false;
-					$modules[$module]['folderName'] = $module;
-				}
+				$modules[$module]['name'] = (array_key_exists("name", $manifest)) ? $manifest['name'] : $module;
+				$modules[$module]['manifest'] = (array_key_exists("permissions", $manifest)) ? $manifest['permissions'] : false;
+				$modules[$module]['folderName'] = $module;
 			}
 		}
 

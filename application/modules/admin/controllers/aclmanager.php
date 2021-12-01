@@ -400,33 +400,30 @@ class Aclmanager extends MX_Controller
 			1 => "#A11D73" // Moderator actions
 		);
 
-		foreach(glob("application/modules/*") as $module)
+		foreach(glob("application/modules/*", GLOB_ONLYDIR) as $module)
 		{
-			if(is_dir($module))
+			$data = file_get_contents($module."/manifest.json");
+			$manifest = json_decode($data, true);
+
+			$module = preg_replace("/^application\/modules\//", "", $module);
+
+			if(is_array($manifest))
 			{
-				$data = file_get_contents($module."/manifest.json");
-				$manifest = json_decode($data, true);
+				$modules[$module]['name'] = (array_key_exists("name", $manifest)) ? $manifest['name'] : $module;
+				$modules[$module]['manifest'] = (array_key_exists("roles", $manifest)) ? $manifest['roles'] : false;
 
-				$module = preg_replace("/^application\/modules\//", "", $module);
-
-				if(is_array($manifest))
+				if($modules[$module]['manifest'])
 				{
-					$modules[$module]['name'] = (array_key_exists("name", $manifest)) ? $manifest['name'] : $module;
-					$modules[$module]['manifest'] = (array_key_exists("roles", $manifest)) ? $manifest['roles'] : false;
-
-					if($modules[$module]['manifest'])
+					foreach($modules[$module]['manifest'] as $k => $v)
 					{
-						foreach($modules[$module]['manifest'] as $k => $v)
+						if(array_key_exists("dangerLevel", $v) && array_key_exists($v['dangerLevel'], $dangerLevel))
 						{
-							if(array_key_exists("dangerLevel", $v) && array_key_exists($v['dangerLevel'], $dangerLevel))
-							{
-								$modules[$module]['manifest'][$k]['color'] = $dangerLevel[$v['dangerLevel']];
-							}
+							$modules[$module]['manifest'][$k]['color'] = $dangerLevel[$v['dangerLevel']];
 						}
 					}
-
-					$modules[$module]['db'] = $this->acl_model->getRolesByModule($module);
 				}
+
+				$modules[$module]['db'] = $this->acl_model->getRolesByModule($module);
 			}
 		}
 

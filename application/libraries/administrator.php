@@ -109,49 +109,46 @@ class Administrator
 	{
 		if(empty($this->modules))
 		{
-			foreach(glob("application/modules/*") as $file)
+			foreach(glob("application/modules/*", GLOB_ONLYDIR) as $file)
 			{
-				if(is_dir($file))
-				{
-					$name = $this->getModuleName($file);
+				$name = $this->getModuleName($file);
 
-					$this->modules[$name] = @file_get_contents($file . "/manifest.json");
+				$this->modules[$name] = @file_get_contents($file . "/manifest.json");
 				
-					if(!$this->modules[$name])
+				if(!$this->modules[$name])
+				{
+					die("The module <b>".$name."</b> is missing manifest.json");
+				}
+				else
+				{
+					$this->modules[$name] = json_decode($this->modules[$name], true);
+
+					// Add the module folder name as name if none was specified
+					if(!array_key_exists("name", $this->modules[$name]))
 					{
-						die("The module <b>".$name."</b> is missing manifest.json");
+						$this->modules[$name]['name'] = $name;
+					}
+					
+					// Add the enabled disabled setting, DEFAULT: disabled
+					if(!array_key_exists("enabled", $this->modules[$name]))
+					{
+						$this->modules[$name]["enabled"] = false;
+					}
+
+					// Add default description if none was specified
+					if(!array_key_exists("description", $this->modules[$name]))
+					{
+						$this->modules[$name]['description'] = "This module has no description";
+					}
+
+					// Check if the module has any configs
+					if($this->hasConfigs($name))
+					{
+						$this->modules[$name]['has_configs'] = true;
 					}
 					else
 					{
-						$this->modules[$name] = json_decode($this->modules[$name], true);
-
-						// Add the module folder name as name if none was specified
-						if(!array_key_exists("name", $this->modules[$name]))
-						{
-							$this->modules[$name]['name'] = $name;
-						}
-						
-						// Add the enabled disabled setting, DEFAULT: disabled
-						if(!array_key_exists("enabled", $this->modules[$name]))
-						{
-							$this->modules[$name]["enabled"] = false;
-						}
-
-						// Add default description if none was specified
-						if(!array_key_exists("description", $this->modules[$name]))
-						{
-							$this->modules[$name]['description'] = "This module has no description";
-						}
-
-						// Check if the module has any configs
-						if($this->hasConfigs($name))
-						{
-							$this->modules[$name]['has_configs'] = true;
-						}
-						else
-						{
-							$this->modules[$name]['has_configs'] = false;
-						}
+						$this->modules[$name]['has_configs'] = false;
 					}
 				}
 			}
