@@ -290,15 +290,22 @@ function Tooltip()
 		$("[data-tip]").hover(
 			function()
 			{
-				$(document).bind('mousemove', Tooltip.addEvents.handleMouseMove);
-				Tooltip.show($(this).attr("data-tip"));
+				if ($(this).attr("data-tip").length > 0)
+					{
+						$(document).bind('mousemove', Tooltip.addEvents.handleMouseMove);
+						Tooltip.show($(this).attr("data-tip"));
+					}
 			},
 			function()
 			{
-				$("#tooltip").hide();
-				$(document).unbind('mousemove', Tooltip.addEvents.handleMouseMove);
+				if ($(this).attr("data-tip").length > 0)
+					{
+						$("#tooltip").hide();
+						$(document).unbind('mousemove', Tooltip.addEvents.handleMouseMove);
+					}
 			}
 		);
+
 
 		if(Config.UseFusionTooltip)
 		{
